@@ -8,7 +8,7 @@ let fields = [
     null,
     null,
     null,
-]
+];
 
 function init() {
     render();
@@ -22,8 +22,8 @@ function render() {
         html += '<tr>';
         for (let j = 0; j < 3; j++) {
             const index = (i * 3) + j;
-            const symbol = fields[index] === null ? '' : (fields[index] === 'circle' ? createAnimatedCircle() : createAnimatedCross());
-            html += `<td onclick="makeMove(${index})">${symbol}</td>`;
+            const symbol = fields[index] === null ? '' : (fields[index] === 'circle' ? generateCircle() : generateCross());
+            html += `<td onclick="makeMove(${index}, this)">${symbol}</td>`;
         }
         html += '</tr>';
     }
@@ -32,113 +32,85 @@ function render() {
     content.innerHTML = html;
 }
 
-function makeMove(index) {
+function makeMove(index, tdElement) {
     if (fields[index] === null) {
         fields[index] = fields.filter(x => x !== null).length % 2 === 0 ? 'circle' : 'cross';
-        render();
+        tdElement.innerHTML = fields[index] === 'circle' ? generateCircle() : generateCross();
+        tdElement.onclick = null; // Entfernen der onclick-Funktion
     }
 }
 
-// Circle Animation
-
-function createAnimatedCircle() {
-    const svgNS = "http://www.w3.org/2000/svg"; 
-    const width = 70;
-    const height = 70;
-    const radius = 30; 
-    const circumference = 2 * Math.PI * radius; 
-
-    const svg = document.createElementNS(svgNS, "svg");
-    svg.setAttribute("width", width);
-    svg.setAttribute("height", height);
-    
-    const outerCircle = document.createElementNS(svgNS, "circle");
-    outerCircle.setAttribute("cx", width / 2);
-    outerCircle.setAttribute("cy", height / 2);
-    outerCircle.setAttribute("r", radius);
-    outerCircle.setAttribute("fill", "none");  
-    outerCircle.setAttribute("stroke", "#00B0EF");
-    outerCircle.setAttribute("stroke-width", "5"); 
-
-    const fillCircle = document.createElementNS(svgNS, "circle");
-    fillCircle.setAttribute("cx", width / 2);
-    fillCircle.setAttribute("cy", height / 2);
-    fillCircle.setAttribute("r", radius);
-    fillCircle.setAttribute("fill", "#00B0EF");
-    fillCircle.setAttribute("stroke", "none");
-    
-    fillCircle.setAttribute("style", "visibility: hidden; animation: fillAnimation 1250ms forwards;");
-
-    const style = document.createElement("style");
-    style.textContent = `
-        @keyframes fillAnimation {
-            0% {
-                r: ${radius}; /* Starten bei voller Radius */
-                visibility: visible; /* Sichtbar */
-            }
-            100% {
-                r: 0; /* Ende bei Radius 0 (Kreis wird gefüllt) */
-            }
-        }
+// Funktion zum Erstellen eines leeren Kreises
+function generateCircle() {
+    return `
+        <div class="circle"></div>
     `;
-
-    svg.appendChild(outerCircle);
-    svg.appendChild(fillCircle);
-    document.head.appendChild(style); 
-
-    return svg.outerHTML;
 }
 
-const animatedFilledCircleSVG = createAnimatedCircle();
-document.getElementById('content').innerHTML = animatedFilledCircleSVG;
-
-// Cross Animation
-
-function createAnimatedCross() {
-    const svgNS = "http://www.w3.org/2000/svg"; 
-    const width = 70;
-    const height = 70;
-
-    const svg = document.createElementNS(svgNS, "svg");
-    svg.setAttribute("width", width);
-    svg.setAttribute("height", height);
-
-    const rect1 = document.createElementNS(svgNS, "rect");
-    rect1.setAttribute("x", 30); 
-    rect1.setAttribute("y", 0);
-    rect1.setAttribute("width", 10); 
-    rect1.setAttribute("height", height); 
-    rect1.setAttribute("fill", "rgb(253, 207, 66)"); 
-    rect1.setAttribute("transform", "rotate(45 35 35)"); 
-    rect1.setAttribute("style", "animation: fillAnimation 1250ms forwards; animation-delay: 0s;"); 
-
-    const rect2 = document.createElementNS(svgNS, "rect");
-    rect2.setAttribute("x", 0);  
-    rect2.setAttribute("y", 30); 
-    rect2.setAttribute("width", width); 
-    rect2.setAttribute("height", 10); 
-    rect2.setAttribute("fill", "rgb(253, 207, 66)"); 
-    rect2.setAttribute("transform", "rotate(-130 35 35)"); 
-    rect2.setAttribute("style", "animation: fillAnimation 1250ms forwards; animation-delay: 0s;"); 
-
-    const style = document.createElement("style");
-    style.textContent = `
-        @keyframes fillAnimation {
-            0% {
-                opacity: 0; /* Unsichtbar zu Beginn der Animation */
-            }
-            100% {
-                opacity: 1; /* Voll sichtbar am Ende der Animation */
-            }
-        }
+// Beispiel-Implementierung für ein Kreuz (optional)
+function generateCross() {
+    return `
+        <div class="cross"></div>
     `;
-
-    svg.appendChild(rect1);
-    svg.appendChild(rect2);
-    document.head.appendChild(style); 
-
-    return svg.outerHTML;
 }
 
-const animatedCrossSVG = createAnimatedCross();
-document.getElementById('content').innerHTML = animatedCrossSVG;
+// CSS-Styles
+const style = document.createElement('style');
+style.innerHTML = `
+    table {
+        border-collapse: collapse;
+    }
+    td {
+        width: 70px; /* Breite der Zelle */
+        height: 70px; /* Höhe der Zelle */
+        position: relative; /* Für die Zentrierung */
+        cursor: pointer; /* Cursor beim Hover */
+    }
+    .circle {
+        width: 70px;
+        height: 70px;
+        background-color: transparent; /* Hintergrund transparent für leeren Kreis */
+        border: 5px solid #00B0EF; /* Randfarbe */
+        border-radius: 50%; /* Runde Form */
+        animation: pulse 2400ms; /* Pulsierende Animation */
+        position: absolute; /* Für die Zentrierung */
+        top: 50%; /* Vertikal zentrieren */
+        left: 50%; /* Horizontal zentrieren */
+        transform: translate(-50%, -50%); /* Verschiebung zur exakten Mitte */
+    }
+
+    .cross {
+        position: absolute; /* Positionierung für die Zentrierung */
+        top: 50%; /* Vertikal zentrieren */
+        left: 50%; /* Horizontal zentrieren */
+        width: 70px; /* Gesamtbreite des X */
+        height: 70px; /* Gesamthöhe des X */
+        animation: pulseCross 2400ms forwards; /* Pulsierende Animation, einmal durchlaufen */
+        transform: translate(-50%, -50%) rotate(45deg); /* Verschiebung zur exakten Mitte und Drehung um 45 Grad */
+    }
+
+    .cross:before, .cross:after {
+        content: "";
+        position: absolute; /* Positionierung für die Zentrierung */
+        background-color: #FFC000; /* Farbton für das X */
+        width: 5px; /* Dicke der Kreuzlinien */
+        height: 70px; /* Höhe der vertikalen Linie */
+        top: 0; /* Zentriert im Bezug auf den oberen Teil */
+        left: 50%; /* Horizontal zentrieren */
+        transform: translateX(-50%); /* Horizontale Zentrierung */
+    }
+
+    .cross:after {
+        transform: translate(-50%, 0) rotate(90deg); /* Zweite Linie für das X */
+    }
+
+    @keyframes pulseCross {
+        0% {
+            transform: translate(-50%, -50%) scale(1) rotate(45deg); /* Startzustand */
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1.1) rotate(45deg); /* Schlusszustand */
+        }
+    }
+`;
+document.head.appendChild(style);
